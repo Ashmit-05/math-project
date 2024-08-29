@@ -13,21 +13,21 @@ OpenAI API does not accept image file input directly. It takes in an image URL. 
 There are a few things you need to take care of when setting up your S3 bucket.
 - To be able to access objects inside the bucket, you need them to be public by default
 - This can be achieved by selecting your bucket, going to permissions and adding this to the bucket policy
-        ```
+```
+{
+    "Version": "2012-10-17",
+        "Id": "Policy1724880538356",
+        "Statement": [
         {
-            "Version": "2012-10-17",
-            "Id": "Policy1724880538356",
-            "Statement": [
-                {
-                    "Sid": "Stmt1724880533926",
-                    "Effect": "Allow",
-                    "Principal": "*",
-                    "Action": "s3:GetObject",
-                    "Resource": "arn:aws:s3:::math-project-images/*"
-                }
-            ]
+            "Sid": "Stmt1724880533926",
+            "Effect": "Allow",
+            "Principal": "*",
+            "Action": "s3:GetObject",
+            "Resource": "arn:aws:s3:::math-project-images/*"
         }
-        ```
+        ]
+}
+```
 - Note that you require only a single bucket, and that bucket name is hardcoded in the project(math-project-images). If you wish to use another name, make the changes
 
 
