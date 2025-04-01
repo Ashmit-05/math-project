@@ -1,0 +1,30 @@
+{
+    "ResponseMetadata": {
+        "RequestId": "EJY4S4SC2WT1222F",
+        "HostId": "gRkfTL2hvHYIWiu1DMmmSK6Y0XYva1fHZYLZhur5MMMdNOS4CCvCPV7Sr8fOJmoxwxehu6DoFQg=",
+        "HTTPStatusCode": 200,
+        "HTTPHeaders": {
+            "x-amz-id-2": "gRkfTL2hvHYIWiu1DMmmSK6Y0XYva1fHZYLZhur5MMMdNOS4CCvCPV7Sr8fOJmoxwxehu6DoFQg=",
+            "x-amz-request-id": "EJY4S4SC2WT1222F",
+            "date": "Thu, 29 Aug 2024 21:19:43 GMT",
+            "last-modified": "Thu, 29 Aug 2024 21:00:43 GMT",
+            "etag": "\"8609be063d4082780ee8ec45e393071e\"",
+            "x-amz-server-side-encryption": "AES256",
+            "x-amz-version-id": "YmbIdvvFKy2fcSxwxRj85l1Hg6YyPDso",
+            "accept-ranges": "bytes",
+            "content-type": "binary/octet-stream",
+            "server": "AmazonS3",
+            "content-length": "494375"
+        },
+        "RetryAttempts": 1
+    },
+    "AcceptRanges": "bytes",
+    "LastModified": "2024-08-29 21:00:43+00:00",
+    "ContentLength": 494375,
+    "ETag": "\"8609be063d4082780ee8ec45e393071e\"",
+    "VersionId": "YmbIdvvFKy2fcSxwxRj85l1Hg6YyPDso",
+    "ContentType": "binary/octet-stream",
+    "ServerSideEncryption": "AES256",
+    "Metadata": {},
+    "Body": "<botocore.response.StreamingBody object at 0x106b3dd20>"
+}

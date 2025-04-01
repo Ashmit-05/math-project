@@ -1,10 +1,8 @@
 import logging
 import boto3
 from botocore.exceptions import ClientError
-import os
 
-
-def upload_file(file_name, bucket="math-project-images", object_name=None):
+def upload_file_to_s3_bucket(pdf, object_name=None):
     """Upload a file to an S3 bucket
 
     :param file_name: File to upload
@@ -13,19 +11,23 @@ def upload_file(file_name, bucket="math-project-images", object_name=None):
     :return: True if file was uploaded, else False
     """
 
+    bucket = 'math-project-images'
     # If S3 object_name was not specified, use file_name
     if object_name is None:
-        object_name = os.path.basename(file_name)
+        if hasattr(pdf,'filename'):
+            object_name = pdf.filename 
+        else:
+            object_name = str(pdf)
 
     # Upload the file
     s3_client = boto3.client('s3')
     try:
-        response = s3_client.upload_file(file_name, bucket, object_name)
+        if hasattr(pdf,'file'):
+            s3_client.upload_fileobj(pdf.file,bucket,object_name)
+        else:
+            s3_client.upload_fileobj(pdf,bucket,object_name)
     except ClientError as e:
-        logging.error(e)
-        return e
-    return response
-
-file = input("filepath:")
-r = upload_file(file)
-print(r)
+        # logging.error(e)
+        logging.critical(e)
+        return False
+    return True
