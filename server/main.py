@@ -83,7 +83,8 @@ def upload_pdf(file: UploadFile):
         pdf_bytes = BytesIO(pdf.content)
         image_urls = get_images_urls(pdf_bytes,filename)
         logging.info(msg=f"Image urls : {image_urls}")
-        content = groq_evaluate(image_urls)
+        # content = groq_evaluate(image_urls)
+        content = openai_evaluate(image_urls)
         logging.info(msg=f"Model response = {content}")
         # total_score = calculate_total_score(content.content) # modify the function to match json output from openrouter
         # return {"response":content, "score": total_score}
