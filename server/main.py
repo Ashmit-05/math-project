@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, UploadFile
+from fastapi import FastAPI, HTTPException, UploadFile, Form
 from aws_functions.aws_get_object_url import get_object_url
 from aws_functions.aws_uploadfile import upload_file_to_s3_bucket
 from dotenv import dotenv_values
@@ -9,10 +9,12 @@ from pymongo import MongoClient
 from io import BytesIO
 import logging
 import requests
+import json
 
-from helper_functions.calculate_score import calculate_total_score
+from helper_functions.calculate_score import calculate_score
 from helper_functions.open_ai import openai_evaluate
 from helper_functions.pdf_2_image import get_images_urls
+from models import PDFModel
 # from helper_functions.qwen_model import evaluate_images_with_qwen
 
 
@@ -54,9 +56,9 @@ def read_root():
 
 @app.post(
         path="/upload",
-        # response_model=PDFModel,
+        response_model=PDFModel,
         )
-def upload_pdf(file: UploadFile):
+async def upload_pdf(file: UploadFile, name: str = Form(...)):
     logging.info(msg=f"File headers : {file.headers}")
     if file.headers["content-type"] != "application/pdf":
         print(file.headers["content-type"])
@@ -83,12 +85,31 @@ def upload_pdf(file: UploadFile):
         pdf_bytes = BytesIO(pdf.content)
         image_urls = get_images_urls(pdf_bytes,filename)
         logging.info(msg=f"Image urls : {image_urls}")
-        # content = groq_evaluate(image_urls)
+        
+        # get evaluation from OpenAI
         content = openai_evaluate(image_urls)
         logging.info(msg=f"Model response = {content}")
-        # total_score = calculate_total_score(content.content) # modify the function to match json output from openrouter
-        # return {"response":content, "score": total_score}
-        return {"response" : content}
+        
+        # calculate actual score
+        actual_score = calculate_score(content)
+        logging.info(msg=f"Actual score = {actual_score}")
+        
+        # parse the content to JSON
+        evaluations = json.loads(content)
+        
+        # create PDFModel instance
+        pdf_model = PDFModel(
+            pdf_url=file_url,
+            name=name,
+            evaluations=evaluations,
+            actual_score=actual_score
+        )
+        
+        # store in MongoDB
+        result = app.database.pdfs.insert_one(pdf_model.dict())
+        logging.info(f"Stored PDF evaluation in MongoDB with id: {result.inserted_id}")
+        
+        return pdf_model
     except Exception as e:
-        logging.error(f"Unexpected error occured in main.py upload_pdf function: {e}")
+        logging.error(f"Unexpected error occurred in main.py upload_pdf function: {e}")
         raise HTTPException(status_code=500,detail="Encountered an unexpected error")

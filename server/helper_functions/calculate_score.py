@@ -1,9 +1,10 @@
-import re
+import json
 
-def calculate_total_score(input_text):
-    # Regular expression to match the pattern "Answer <answer no.> is correct : <marks>"
-    pattern = r"Answer \d+[a-zA-Z]? is correct : (\d+)"
-
-    marks = re.findall(pattern, input_text)
-    total_score = sum(int(mark) for mark in marks)
-    return total_score
+def calculate_score(response_content: str) -> int:
+    try:
+        response_data = json.loads(response_content)
+        total = sum(evaluation['marks'] for evaluation in response_data['evaluations'])
+        return total
+    except (json.JSONDecodeError, KeyError, TypeError) as e:
+        print(f"Error calculating score: {e}")
+        return 0
