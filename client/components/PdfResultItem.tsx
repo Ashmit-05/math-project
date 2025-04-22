@@ -4,7 +4,6 @@ import { PdfResult } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Eye, ChevronDown, ChevronUp } from 'lucide-react';
-import { formatDate } from '@/lib/utils';
 
 interface Evaluation {
   answer_number: number;
@@ -25,9 +24,6 @@ export function PdfResultItem({ result }: PdfResultItemProps) {
         <div className="flex items-center justify-between p-4">
           <div className="flex-1">
             <h3 className="font-medium text-lg truncate">{result.name}</h3>
-            <p className="text-sm text-muted-foreground">
-              {formatDate(new Date(result.createdAt))}
-            </p>
           </div>
           
           <div className="flex items-center gap-4">
