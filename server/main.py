@@ -1,11 +1,13 @@
 from fastapi import FastAPI, HTTPException, UploadFile, Form
+from fastapi.middleware.cors import CORSMiddleware
 from aws_functions.aws_get_object_url import get_object_url
 from aws_functions.aws_uploadfile import upload_file_to_s3_bucket
 from dotenv import dotenv_values
 from helper_functions.gemini_ai import gemini_evaluate, gemini_image_evaluate
 from helper_functions.groq import groq_evaluate
 from helper_functions.openrouter import openrouter_models_evaluate
-from pymongo import MongoClient
+from pymongo import MongoClient, mongo_client
+from bson import ObjectId
 from io import BytesIO
 import logging
 import requests
@@ -14,7 +16,7 @@ import json
 from helper_functions.calculate_score import calculate_score
 from helper_functions.open_ai import openai_evaluate
 from helper_functions.pdf_2_image import get_images_urls
-from models import PDFModel
+from models import PDFModel, PDFCollection
 # from helper_functions.qwen_model import evaluate_images_with_qwen
 
 
@@ -29,6 +31,15 @@ logging.info("Logging is configured successfully!")
 
 config = dotenv_values(".env")
 app = FastAPI()
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allows all origins
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all methods
+    allow_headers=["*"],  # Allows all headers
+)
 
 @app.on_event("startup")
 def startup_db_client():
@@ -45,6 +56,63 @@ def shutdown_db_client():
 @app.get("/")
 def read_root():
     return {"Hello": "World1322"}
+
+
+@app.get("/results")
+async def get_results():
+    try:
+        # Fetch all documents from the pdfs collection and convert to list
+        cursor = app.database.pdfs.find()
+        documents = list(cursor)  # Convert cursor to list
+        
+        # Convert MongoDB documents to PDFModel instances
+        results = []
+        for doc in documents:
+            # Convert ObjectId to string for the id field
+            doc['id'] = str(doc.pop('_id'))
+            results.append(PDFModel(**doc))
+        
+        # Create response with status code and data
+        return {
+            "status": 200,
+            "data": {
+                "results": [result.dict() for result in results]
+            }
+        }
+    except Exception as e:
+        logging.error(f"Error fetching results: {e}")
+        raise HTTPException(status_code=500, detail="Failed to fetch results")
+
+
+@app.get("/results/{result_id}")
+async def get_result_by_id(result_id: str):
+    try:
+        # Convert string ID to ObjectId
+        try:
+            obj_id = ObjectId(result_id)
+        except Exception as e:
+            raise HTTPException(status_code=400, detail="Invalid ID format")
+        
+        # Find document by ID
+        doc = app.database.pdfs.find_one({"_id": obj_id})
+        if not doc:
+            raise HTTPException(status_code=404, detail="Result not found")
+        
+        # Convert ObjectId to string
+        doc['id'] = str(doc.pop('_id'))
+        
+        # Convert to PDFModel and return
+        result = PDFModel(**doc)
+        
+        return {
+            "status": 200,
+            "data": result.dict()
+        }
+    except HTTPException as he:
+        raise he
+    except Exception as e:
+        logging.error(f"Error fetching result by ID: {e}")
+        raise HTTPException(status_code=500, detail="Failed to fetch result")
 
 
 # test with these models :
