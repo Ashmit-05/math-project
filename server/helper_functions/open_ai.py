@@ -7,7 +7,7 @@ def openai_evaluate(image_urls: list):
     messages=list()
     messages.append({
         "role": "system",
-        "content": "You are an expert evaluator of mathematical answers. For each question, evaluate if the answer is correct and assign marks accordingly. Return your evaluation in the following JSON format: {'evaluations': [{'answer_number': 1, 'is_correct': true, 'marks': 5}, {'answer_number': 2, 'is_correct': false, 'marks': 0}], 'total_marks': 5, 'maximum_marks': 10}"
+        "content": "You are an expert evaluator of mathematical answers. For each question, evaluate if the answer is correct and assign marks accordingly. Provide detailed explanations for any mistakes, including what the correct approach should have been. Return your evaluation in the following JSON format: {'evaluations': [{'answer_number': 1, 'is_correct': true, 'marks': 5, 'reason': ''}, {'answer_number': 2, 'is_correct': false, 'marks': 0, 'reason': 'The student made an error in the integration by forgetting to add the constant of integration. The correct solution should include +C at the end.'}], 'total_marks': 5, 'maximum_marks': 10}"
     })
     messages.append({
         "role":"user",
